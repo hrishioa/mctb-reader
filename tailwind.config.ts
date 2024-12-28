@@ -1,3 +1,4 @@
+// tailwind.config.ts
 import type { Config } from "tailwindcss";
 
 export default {
@@ -9,8 +10,18 @@ export default {
   theme: {
     extend: {
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+        background: "var(--color-background)",
+        foreground: "var(--color-text)",
+        link: "var(--color-link)",
+        "link-hover": "var(--color-link-hover)",
+        border: "var(--color-border)",
+      },
+      typography: {
+        DEFAULT: {
+          css: {
+            maxWidth: "65ch",
+          },
+        },
       },
     },
   },

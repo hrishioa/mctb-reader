@@ -1,41 +1,51 @@
 // pages/[[...slug]].tsx
 import type { GetServerSideProps, NextPage } from "next";
+import Head from "next/head";
 import extractReadableContent from "@/utils/extractReadableContent";
 import ModifiedLink from "@/components/ModifiedLink";
-import { JSDOM } from "jsdom"; // Add this import
+import { JSDOM } from "jsdom";
 import "../styles/globals.css";
+import ReadingProgress from "../components/ReadingProgress";
+import ThemeToggle from "../components/ThemeToggle";
+import { ThemeProvider } from "../contexts/ThemeContext";
 
 type Props = {
-  extractedContent: { text: string } | null;
+  extractedContent: { text: string; title?: string } | null;
   links: Array<{
     href: string;
     innerHTML: string;
   }>;
-  externalProcessOutput: string | null; // Changed to include null
 };
 
-const ArticlePage: NextPage<Props> = ({
-  extractedContent,
-  links,
-  externalProcessOutput,
-}) => {
+const ArticlePage: NextPage<Props> = ({ extractedContent, links }) => {
   if (!extractedContent) {
     return <div>Failed to load content</div>;
   }
 
+  const title = extractedContent.title || links[0]?.innerHTML || "Reading";
+
   return (
-    <div className="content-container">
-      <div dangerouslySetInnerHTML={{ __html: extractedContent.text }} />
-      {/* Rest of the component */}
-    </div>
+    <ThemeProvider>
+      <Head>
+        <title>{title} - Reader</title>
+      </Head>
+      <div className="content-container">
+        <ThemeToggle />
+        <ReadingProgress />
+        <h1 className="text-3xl font-bold mb-8">{title}</h1>
+        <div
+          className="prose prose-lg dark:prose-invert max-w-none"
+          dangerouslySetInnerHTML={{ __html: extractedContent.text }}
+        />
+      </div>
+    </ThemeProvider>
   );
 };
 
-// src/pages/[[...slug]].tsx
 export const getServerSideProps: GetServerSideProps<Props> = async (
   context
 ) => {
-  const { slug } = context.params;
+  const { slug } = context.params || {};
   const baseUrl = "https://www.mctb.org/mctb2/";
   const url = `${baseUrl}${Array.isArray(slug) ? slug.join("/") : slug || ""}`;
 
@@ -70,7 +80,6 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
       props: {
         extractedContent,
         links,
-        externalProcessOutput: null,
       },
     };
   } catch (error) {
@@ -79,7 +88,6 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
       props: {
         extractedContent: null,
         links: [],
-        externalProcessOutput: null,
       },
     };
   }

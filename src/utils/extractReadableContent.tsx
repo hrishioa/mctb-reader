@@ -3,11 +3,12 @@ import { JSDOM } from "jsdom";
 
 type ExtractedContent = {
   text: string;
+  title?: string;
 };
 
 async function extractReadableContent(
   html: string,
-  currentUrl: string // Add this parameter
+  currentUrl: string
 ): Promise<ExtractedContent | null> {
   try {
     const dom = new JSDOM(html);
@@ -22,12 +23,28 @@ async function extractReadableContent(
       return null;
     }
 
-    // Rewrite all internal links to use the current domain
+    // Clean up span elements with property attributes
+    const propertySpans = mainContentElement.querySelectorAll("span[property]");
+    propertySpans.forEach((span) => {
+      const text = span.textContent || "";
+      const textNode = document.createTextNode(text);
+      span.parentNode?.replaceChild(textNode, span);
+    });
+
+    // Find and extract the title
+    let title = "";
+    const h1 = mainContentElement.querySelector("h1");
+    if (h1) {
+      title = h1.textContent || "";
+      // Remove the original h1 as we'll render it in our React component
+      h1.remove();
+    }
+
+    // Rewrite links
     const links = mainContentElement.querySelectorAll("a");
     links.forEach((link) => {
       const href = link.getAttribute("href");
       if (href && href.startsWith("https://www.mctb.org")) {
-        // Remove the original domain and keep the path
         const path = href.replace("https://www.mctb.org", "");
         link.setAttribute("href", path);
       }
@@ -35,12 +52,19 @@ async function extractReadableContent(
 
     // Remove unwanted elements
     const elementsToRemove = mainContentElement.querySelectorAll(
-      'script, style, img, svg, [class*="ad"], [id*="ad"], .table-of-contents, header, footer, nav'
+      'script, style, img, svg, [class*="ad"], [id*="ad"], .table-of-contents, header, footer, nav, .breadcrumbs'
     );
     elementsToRemove.forEach((el) => el.remove());
 
+    // Clean up any remaining HTML artifacts
+    const content = mainContentElement.innerHTML
+      .replace(/\s+/g, " ")
+      .replace(/>\s+</g, "><")
+      .trim();
+
     return {
-      text: mainContentElement.innerHTML,
+      text: content,
+      title,
     };
   } catch (error) {
     console.error("Error extracting content:", error);

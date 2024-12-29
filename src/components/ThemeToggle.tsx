@@ -18,6 +18,7 @@ export default function ThemeToggle() {
         {Object.entries(themeIcons).map(([key, icon]) => (
           <button
             key={key}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             onClick={() => setTheme(key as any)}
             className={`p-2 rounded-md transition-colors ${
               theme === key

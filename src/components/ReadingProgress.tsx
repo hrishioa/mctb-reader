@@ -12,6 +12,15 @@ export default function ReadingProgress() {
     useState<ReturnType<typeof getLastPosition>>(null);
 
   useEffect(() => {
+    // Check for last position when component mounts
+    const position = getLastPosition();
+    if (position && position.url !== router.asPath) {
+      setLastPosition(position);
+      setShowToast(true);
+    }
+  }, [router.asPath]);
+
+  useEffect(() => {
     const calculateProgress = () => {
       const windowHeight = window.innerHeight;
       const documentHeight =
@@ -37,18 +46,26 @@ export default function ReadingProgress() {
   return (
     <>
       {/* Progress bar */}
-      <div className="fixed top-0 left-0 w-full h-1 bg-gray-200 z-50">
-        <div className="h-full bg-link" style={{ width: `${progress}%` }} />
+      <div className="fixed top-0 left-0 w-full h-1 bg-border z-50">
+        <div
+          className="h-full transition-all duration-300 ease-out"
+          style={{
+            width: `${progress}%`,
+            backgroundColor: "var(--color-link)",
+          }}
+        />
       </div>
 
-      {/* Scroll percentage indicator */}
-      <div className="scroll-percentage">{Math.round(progress)}%</div>
+      {/* Progress percentage indicator */}
+      <div className="fixed bottom-4 left-4 bg-background/80 border border-border rounded-lg px-3 py-2 text-sm font-medium text-foreground shadow-lg z-50 backdrop-blur-sm float-on-hover">
+        {Math.round(progress)}%
+      </div>
 
       {/* Continue reading toast */}
       {showToast && lastPosition && (
-        <div className="reading-progress-toast">
-          <p className="mb-2 font-medium">Continue reading?</p>
-          <p className="text-sm text-gray-600 mb-3">
+        <div className="reading-progress-toast float-on-hover">
+          <p className="mb-2 font-medium text-foreground">Continue reading?</p>
+          <p className="text-sm text-foreground/70 mb-3">
             {lastPosition.title} (
             {Math.round(
               (lastPosition.scrollPosition /
@@ -68,13 +85,13 @@ export default function ReadingProgress() {
                   setShowToast(false);
                 });
               }}
-              className="bg-link text-white px-4 py-2 rounded-md hover:bg-link-hover"
+              className="bg-link hover:bg-link-hover text-white px-4 py-2 rounded-md transition-colors float-on-hover"
             >
               Continue
             </button>
             <button
               onClick={() => setShowToast(false)}
-              className="border border-border px-4 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
+              className="border border-border hover:bg-border/10 px-4 py-2 rounded-md transition-colors float-on-hover"
             >
               Dismiss
             </button>

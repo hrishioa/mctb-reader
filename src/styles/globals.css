@@ -148,6 +148,16 @@ body {
   animation: slideIn 0.3s ease-out;
 }
 
+.float-on-hover {
+  transition: all 0.3s ease-out;
+  transform: translateY(0);
+}
+
+.float-on-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
 .reading-progress-toast button {
   padding: 0.5rem 1rem;
   border-radius: 0.5rem;

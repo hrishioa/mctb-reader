@@ -4,7 +4,6 @@ import Head from "next/head";
 import extractReadableContent from "@/utils/extractReadableContent";
 import ModifiedLink from "@/components/ModifiedLink";
 import { JSDOM } from "jsdom";
-import "../styles/globals.css";
 import ReadingProgress from "../components/ReadingProgress";
 import ThemeToggle from "../components/ThemeToggle";
 import { ThemeProvider } from "../contexts/ThemeContext";
